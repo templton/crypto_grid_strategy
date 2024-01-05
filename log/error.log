@@ -1,0 +1,1 @@
+2024/01/04 05:58:54 [warn] 7#7: *293 an upstream response is buffered to a temporary file /var/cache/nginx/fastcgi_temp/1/00/0000000001 while reading upstream, client: 172.18.0.1, server: , request: "GET / HTTP/1.1", upstream: "fastcgi://172.18.0.3:9000", host: "localhost:8180"

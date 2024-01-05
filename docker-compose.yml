@@ -1,0 +1,59 @@
+version: '3'
+services:
+
+    php:
+        container_name: api_php
+        env_file:
+            - .env
+        build:
+            context: .
+            dockerfile: docker/php/Dockerfile
+            args:
+                TIMEZONE: ${TIMEZONE}
+        volumes:
+            - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+            - ./src:/var/www/apicode
+
+    nginx:
+        build:
+            context: .
+            dockerfile: docker/nginx/Dockerfile
+        ports:
+            - ${SERVER_PORT}:80
+        volumes:
+            - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+            - ./log:/var/log/nginx
+            - ./src:/var/www/apicode
+
+    mysql:
+        image: mysql:8.0.2
+        command: --default-authentication-plugin=mysql_native_password
+        restart: always
+        environment:
+            - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+            - MYSQL_DATABASE=${DB_NAME}
+            - MYSQL_USER=${DB_USER}
+            - MYSQL_PASSWORD=${DB_PASSWORD}
+        volumes:
+            - type: volume
+              source: mysql_data
+              target: /var/lib/mysql
+            - type: bind
+              source: ./docker/mysql/dump
+              target: /docker-entrypoint-initdb.d
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        ports:
+            - ${PMA_PORT}:80
+        environment:
+            - PMA_HOST=${DB_HOST}
+
+    maildev:
+        image: djfarrelly/maildev
+        ports:
+            - ${MAILDEV_PORT}:80
+
+volumes:
+    mysql_data:
+        driver: local
